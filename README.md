@@ -72,6 +72,51 @@ module.exports = {
 
 The serving port can be changed with the `-p`/`--port` option.
 
+## Using with `Angular CLI`
+
+CORS issues when trying to use netlify-lambdas locally with angular? you need to set up a proxy.
+
+Firstly make sure you are using relative paths in your app to ensure that your app will work locally and on Netlify, example below...
+
+```js
+  this.http.get('/.netlify/functions/jokeTypescript')
+```
+
+Then place a `proxy.config.json` file in the root of your project, the contents should look something like...
+
+```json
+{
+  "/.netlify/functions/*": {
+    "target": "http://localhost:9000",
+    "secure": false,
+    "logLevel": "debug",
+    "changeOrigin": true
+  }
+}
+```
+
+- The `key` should match up with the location of your Transpiled `functions` as defined in your `netlify.toml`
+- The `target` should match the port that the lambdas are being served on (:9000 by default)
+
+When you run up your Angular project you need to pass in the proxy config with the flag `--proxy-config` like so...
+
+```bash
+  ng serve --proxy-config proxy.config.json
+```
+
+To make your life easier you can add these to your `scripts` in `package.json`
+
+```json
+  "scripts": {
+    "start": "ng serve --proxy-config proxy.config.json",
+    "build": "ng build --prod --aot && yarn nlb",
+    "nls": "netlify-lambda serve src_functions",
+    "nlb": "netlify-lambda build src_functions"
+  }
+```
+
+Obviously you need to run up `netlify-lambda` & `angular` at the same time.
+
 ### Debugging
 
 To debug lambdas, prepend the `serve` command with [npm's package runner npx](https://medium.com/@maybekatz/introducing-npx-an-npm-package-runner-55f7d4bd282b) `npx --node-arg=--inspect netlify-lambda serve ...`. Additionally, make sure that sourcemaps are built along the way (e.g. in the webpack configuration and the `tsconfig.json` if typescript is used) and webpack's uglification is turned off with `optimization: { minimize: false }`. If using VSCode,  it is likely that the `sourceMapPathOverrides` have to be adapted for breakpoints to work.
