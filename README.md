@@ -63,6 +63,10 @@ module.exports = {
 
 The serving port can be changed with the `-p`/`--port` option.
 
+### Debugging
+
+To debug lambdas, prepend the `serve` command with [npm's package runner npx](https://medium.com/@maybekatz/introducing-npx-an-npm-package-runner-55f7d4bd282b) `npx --node-arg=--inspect netlify-lambda serve ...`. Additionally, make sure that sourcemaps are built along the way (e.g. in the webpack configuration and the `tsconfig.json` if typescript is used) and webpack's uglification is turned off with `optimization: { minimize: false }`. If using VSCode,  it is likely that the `sourceMapPathOverrides` have to be adapted for breakpoints to work.
+
 ## Webpack Configuration
 
 By default the webpack configuration uses `babel-loader` to load all js files. Any `.babelrc` in the directory `netlify-lambda` is run from will be respected. If no `.babelrc` is found, a [few basic settings are used](https://github.com/netlify/netlify-lambda/blob/master/lib/build.js#L11-L15a).
